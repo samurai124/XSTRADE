@@ -7,19 +7,9 @@ import service.TradingPlatform;
 public class Main {
     static void main() {
         TradingPlatform t = new TradingPlatform();
-        t.diplayTraders();
 
-        t.addTrader();
-        t.addTrader();
+        t.appInerface();
 
-        t.diplayTraders();
-
-        t.displayAssets();
-
-        t.addasset();
-        t.addasset();
-
-        t.displayAssets();
 
     }
 }

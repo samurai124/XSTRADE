@@ -53,21 +53,15 @@ public abstract class Asset implements Identifiable{
     // function to update price randomly
     public void updatePriceRandomly() {
         Random r = new Random();
+        int minStep = priceInterval.get(0);
+        int maxStep = priceInterval.get(priceInterval.size() - 1);
 
-        int minStep = priceInterval.getFirst();
-        int maxStep = priceInterval.getLast();
-        int change = r.nextInt(minStep, maxStep);
+        // Calculate change
+        int change = r.nextInt(minStep, maxStep + 1);
+        this.unitPrice += change;
 
-        float newPrice = this.unitPrice + change;
-
-        if (newPrice > this.unitPrice) {
-            System.out.println("📈 The price is up now: " + newPrice);
-        } else if (newPrice < this.unitPrice) {
-            System.out.println("📉 The price is down now: " + newPrice);
-        } else {
-            System.out.println("➖ No change: " + newPrice);
-        }
-        this.unitPrice = newPrice;
+        // Keep price from dropping below 0
+        if (this.unitPrice < 0) this.unitPrice = 0;
     }
 
 }
