@@ -265,7 +265,7 @@ public class TradingPlatform {
                 // call the updatePrice function for each asset
                 a.updatePriceRandomly();
             }
-        }, 0, 10, TimeUnit.SECONDS);
+        }, 0, 5, TimeUnit.SECONDS);
     }
 
     // function to stop updateAssetsPrice
@@ -327,13 +327,12 @@ public class TradingPlatform {
         // verifying if the user trader exist
         if (trader == null) {
             System.out.println("❌ No trader with this portfolio id exists");
+            return;
         }
 
         // assigning the trader to the currentTrader
         currentTrader = trader;
 
-        // calling the price updating function
-        updateAssetsPrice();
 
         // calling the trader menu
         traderMenu();
@@ -343,7 +342,6 @@ public class TradingPlatform {
     // log out function
     public void logOut() {
         currentTrader = null;
-        stopUpdateAssetsPrice();
         System.out.println("good by");
     }
 
@@ -391,8 +389,6 @@ public class TradingPlatform {
             return;
         }
 
-        updateAssetsPrice();
-
         int choice = 0;
         do {
             System.out.println("\n____________________________________________ Admin menu ____________________________________________");
@@ -411,7 +407,7 @@ public class TradingPlatform {
                 case 3 -> displayTransactions();
                 case 4 -> exportTransactions();
                 case 5 -> watchAllAssets();
-                case 6 -> stopUpdateAssetsPrice();
+                case 6 -> System.out.println("ok");
                 default -> System.out.println("❌ Invalid choice.");
             }
         } while (choice != 6);
@@ -430,6 +426,9 @@ public class TradingPlatform {
                                                                    
                   -- THE FUTURE OF DIGITAL TRADING --
         \u001B[0m""");
+        // calling the price updating function
+        updateAssetsPrice();
+
 
         int choice = 0;
         do{
@@ -444,7 +443,7 @@ public class TradingPlatform {
                 case 1 -> addTrader();
                 case 2 -> logIn();
                 case 3 -> appManagment();
-                case 4 -> System.out.println("you are out of xstrade ");
+                case 4 -> stopUpdateAssetsPrice();
                 default -> System.out.println("invalid choice");
             }
         }while (choice != 4);

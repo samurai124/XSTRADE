@@ -137,7 +137,7 @@ public class Portfolio<T extends Asset> implements Identifiable {
                     }
 
                     System.out.println("\n[Press Enter to go back]");
-                    Thread.sleep(5000);
+                    Thread.sleep(2000);
                 }
             } catch (InterruptedException e) {
             }
