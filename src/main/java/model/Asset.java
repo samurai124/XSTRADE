@@ -8,13 +8,23 @@ public abstract class Asset implements Identifiable{
     private int id;
     private String name;
     private float unitPrice;
+    private int quantite;
     private ArrayList<Integer> priceInterval ;
 
-    public Asset(String name,float unitPrice,ArrayList<Integer> priceInterval){
+    public Asset(String name,float unitPrice,int quantite,ArrayList<Integer> priceInterval){
         this.id = nextId++;
         this.name = name;
         this.unitPrice = unitPrice;
+        this.quantite = quantite;
         this.priceInterval = priceInterval;
+    }
+
+    public int getQuantite() {
+        return quantite;
+    }
+
+    public void setQuantite(int quantite) {
+        this.quantite = quantite;
     }
 
     public String getName() {

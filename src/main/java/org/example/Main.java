@@ -1,12 +1,12 @@
-//package org.example;
-//
-//import service.TradingPlatform;
+package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-//public class Main {
-//    static void main() {
-//        TradingPlatform t = new TradingPlatform();
-//        t.appInerface();
-//    }
+import service.TradingPlatform;
+
+
+
+public class Main {
+   static void main() {
+       TradingPlatform t = new TradingPlatform();
+        t.appInerface();
+   }
 }

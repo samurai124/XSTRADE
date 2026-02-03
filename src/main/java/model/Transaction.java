@@ -1,17 +1,21 @@
 package model;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class Transaction implements Identifiable{
 
     private static int nextId = 1;
     private int id;
+    private LocalDateTime date;
     private String transactionType;
     private float unitPrice;
-
     private Trader trader;
     private Asset asset;
 
     public Transaction(String transactionType,float unitPrice,Trader trader,Asset asset){
         this.id = nextId++;
+        this.date = LocalDateTime.now();
         this.transactionType = transactionType;
         this.unitPrice = unitPrice;
         this.trader = trader;
@@ -57,5 +61,13 @@ public class Transaction implements Identifiable{
 
     public void setAsset(Asset asset) {
         this.asset = asset;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
     }
 }

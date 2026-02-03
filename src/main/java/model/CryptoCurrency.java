@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class CryptoCurrency extends Asset{
     private String coineName;
-    public CryptoCurrency(String name, float unitPrice, ArrayList<Integer> priceInterval, String coineName){
-        super(name,unitPrice,priceInterval);
+    public CryptoCurrency(String name, float unitPrice,int quantite, ArrayList<Integer> priceInterval, String coineName){
+        super(name,unitPrice,quantite,priceInterval);
         this.coineName = coineName;
     }
 

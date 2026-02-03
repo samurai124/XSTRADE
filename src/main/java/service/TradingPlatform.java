@@ -21,15 +21,16 @@ public class TradingPlatform {
     // the list of the assets available in the platform
     private ArrayList<Asset> actifs = new ArrayList<>(
             Arrays.asList(
-                    new CryptoCurrency("bc", 100, new ArrayList<>(java.util.Arrays.asList(-100, 50)), "bite"),
-                    new CryptoCurrency("cc", 50, new ArrayList<>(java.util.Arrays.asList(-10, 50)), "cyte"),
-                    new CryptoCurrency("cd", 100, new ArrayList<>(java.util.Arrays.asList(-100, 500)), "dic"),
-                    new Stock("ap", 89, new ArrayList<>(java.util.Arrays.asList(-90, 50)), "Apple"),
-                    new Stock("gg", 89, new ArrayList<>(java.util.Arrays.asList(-11, 9)), "Google"),
-                    new Stock("N", 89, new ArrayList<>(java.util.Arrays.asList(-80, 50)), "Nvidia"))
+                    new CryptoCurrency("BTC", 65000, 10, new ArrayList<>(Arrays.asList(-500, 500)), "Bitcoin"),
+                    new CryptoCurrency("ETH", 3500, 50, new ArrayList<>(Arrays.asList(-50, 50)), "Ethereum"),
+                    new CryptoCurrency("SOL", 145, 200, new ArrayList<>(Arrays.asList(-5, 5)), "Solana"),
 
+                    new Stock("AAPL", 185, 1000, new ArrayList<>(Arrays.asList(-2, 2)), "Apple Inc."),
+                    new Stock("NVDA", 820, 500, new ArrayList<>(Arrays.asList(-10, 10)), "Nvidia Corporation"),
+                    new Stock("TSLA", 175, 800, new ArrayList<>(Arrays.asList(-4, 4)), "Tesla, Inc."),
+                    new Stock("GOOGL", 150, 1200, new ArrayList<>(Arrays.asList(-1, 1)), "Alphabet Inc.")
+            )
     );
-
     // the list of all the transactions performed in the platform
     private ArrayList<Transaction> transactions = new ArrayList<>();
 
@@ -99,6 +100,9 @@ public class TradingPlatform {
 
         float unitPrice = Validating.validateFloats("unitPrice");
 
+        // getting the quantity
+        int quantity = Validating.validateInts("quantity");
+
         // getting the price intervale
         System.out.println("Enter the price intervale start and end : ");
         int a = Validating.validateInts("start");
@@ -111,7 +115,7 @@ public class TradingPlatform {
             String companyName = Validating.validateString("company name");
 
             // creating the stock object
-            Stock stock = new Stock(name, unitPrice, new ArrayList<>(java.util.Arrays.asList(a, b)), companyName);
+            Stock stock = new Stock(name, unitPrice,quantity, new ArrayList<>(java.util.Arrays.asList(a, b)), companyName);
 
             // register the stock
             actifs.add(stock);
@@ -127,8 +131,7 @@ public class TradingPlatform {
             String cryptoName = Validating.validateString("crypto coin name");
 
             // creating the crypto object
-            CryptoCurrency cryptoCurrency = new CryptoCurrency(name, unitPrice,
-                    new ArrayList<>(java.util.Arrays.asList(a, b)), cryptoName);
+            CryptoCurrency cryptoCurrency = new CryptoCurrency(name, unitPrice, quantity , new ArrayList<>(java.util.Arrays.asList(a, b)), cryptoName);
 
             // register the crypto
             actifs.add(cryptoCurrency);
@@ -138,34 +141,55 @@ public class TradingPlatform {
         }
     }
 
-    // function to display assets
     public void displayAssets() {
-        System.out.println("________________________________ Assets Display ________________________________");
+        final String SEPARATOR =
+                "----------------------------------------------------------------------------------------------------";
+
+        System.out.println(SEPARATOR);
+
+        // 🔹 HEADER (LABELS) - Alignement identique aux transactions
+        System.out.printf(
+                "%-8s | %-6s | %-15s | %12s | %8s | %-20s%n",
+                "TYPE", "ID", "NAME", "PRICE", "QTY", "SOURCE"
+        );
+
+        System.out.println(SEPARATOR);
 
         if (actifs.isEmpty()) {
             System.out.println("No assets available.");
+            System.out.println(SEPARATOR);
             return;
         }
 
-        actifs.stream().forEach(a -> {
-            System.out.print("--------------------------------------------------------------------------------\n");
-            if (a instanceof Stock) {
-                Stock s = (Stock) a; // Casting to Stock
-                System.out.printf("| [STOCK] ID: %d | Name: %s | Price: %.2f | Company: %s\n",
-                        s.getId(), s.getName(), s.getUnitPrice(), s.getCompanyName());
-            } else if (a instanceof CryptoCurrency) {
-                CryptoCurrency c = (CryptoCurrency) a; // Casting to Crypto
-                System.out.printf("| [CRYPTO] ID: %d | Name: %s | Price: %.2f | Coin: %s\n",
-                        c.getId(), c.getName(), c.getUnitPrice(), c.getCoineName());
-            }
-        });
-    }
+        // 🔹 DATA - Affichage en liste continue
+        actifs.forEach(a -> {
+            String type = "";
+            String source = "";
 
+            if (a instanceof Stock) {
+                type = "STOCK";
+                source = ((Stock) a).getCompanyName();
+            } else if (a instanceof CryptoCurrency) {
+                type = "CRYPTO";
+                source = ((CryptoCurrency) a).getCoineName();
+            }
+
+            System.out.printf(
+                    "%-8s | %-6d | %-15s | %12.2f | %8d | %-20s%n",
+                    type,
+                    a.getId(),
+                    a.getName(),
+                    a.getUnitPrice(),
+                    a.getQuantite(),
+                    source
+            );
+        });
+
+        System.out.println(SEPARATOR);
+    }
     // function to register a new transaction in the platform
     public void registerTransaction(Transaction t) {
         System.out.println("___________________________ Transaction Registration ___________________________");
-
-        // creating the transaction object based on your model constructor
 
         // adding to the platform list
         transactions.add(t);
@@ -174,30 +198,45 @@ public class TradingPlatform {
         System.out.println("✅ Transaction (ID: " + t.getId() + ") registered successfully");
     }
 
-    // function to display all the transactions performed in the platform
+    // display history of transaction
     public void displayTransactions() {
-        System.out.println("_____________________________ Transactions History _____________________________");
 
-        // handling empty list
+        final String SEPARATOR =
+                "----------------------------------------------------------------------------------------------------";
+
+        System.out.println(SEPARATOR);
+
+
+        System.out.printf(
+                "%-6s | %-10s | %-15s | %-12s | %12s | %-20s%n",
+                "ID", "TYPE", "ASSET", "TRADER", "UNIT_PRICE", "DATE"
+        );
+
+        System.out.println(SEPARATOR);
+
+
         if (transactions.isEmpty()) {
             System.out.println("No transactions have been performed yet.");
+            System.out.println(SEPARATOR);
             return;
         }
 
-        // using stream to display each transaction record
-        transactions.stream().forEach(t -> {
+
+        transactions.forEach(t -> {
             System.out.printf(
-                    "--------------------------------------------------------------------------------\n" +
-                            "| ID: %-4d  | Type: %-10s | Asset: %-10s |\n" +
-                            "| Trader: %-12s | Unit Price: %-10.2f |\n",
+                    "%-6d | %-10s | %-15s | %-12s | %12.2f | %-20s%n",
                     t.getId(),
                     t.getTransactionType().toUpperCase(),
                     t.getAsset().getName(),
                     t.getTrader().getName(),
-                    t.getUnitPrice());
+                    t.getUnitPrice(),
+                    t.getDate()
+            );
         });
-        System.out.println("--------------------------------------------------------------------------------");
+
+        System.out.println(SEPARATOR);
     }
+
 
     // export Transactions function
     public void exportTransactions() {
@@ -396,8 +435,9 @@ public class TradingPlatform {
             System.out.println("2 ==> Add New Asset (Stock/Crypto)");
             System.out.println("3 ==> View Full Transaction History");
             System.out.println("4 ==> Export Transactions ");
-            System.out.println("5 ==> Global Market Watch");
-            System.out.println("6 ==> Exit Admin Mode");
+            System.out.println("5 ==> View all available assets ");
+            System.out.println("6 ==> Global Market Watch");
+            System.out.println("7 ==> Exit Admin Mode");
 
             choice = validateInts("Admin Choice");
 
@@ -406,11 +446,12 @@ public class TradingPlatform {
                 case 2 -> addasset();
                 case 3 -> displayTransactions();
                 case 4 -> exportTransactions();
-                case 5 -> watchAllAssets();
-                case 6 -> System.out.println("ok");
+                case 5 -> displayAssets();
+                case 6 -> watchAllAssets();
+                case 7 -> System.out.println("ok");
                 default -> System.out.println("❌ Invalid choice.");
             }
-        } while (choice != 6);
+        } while (choice != 7);
 
     }
     // the app interface
