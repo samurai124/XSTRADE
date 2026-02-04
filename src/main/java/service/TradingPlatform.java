@@ -2,16 +2,17 @@ package service;
 
 import model.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.time.*;
+import java.util.stream.Collectors;
 
 import util.Validating;
 
-import static util.Validating.input;
-import static util.Validating.validateInts;
+import static util.Validating.*;
 
 public class TradingPlatform {
 
@@ -36,6 +37,62 @@ public class TradingPlatform {
 
     // current trader in session
     private Trader currentTrader = null;
+
+    public void seedTestData() {
+        // Création des Portefeuilles
+        Portfolio<Asset> p1 = new Portfolio<>(100000f); // Solde important
+        Portfolio<Asset> p2 = new Portfolio<>(5000f);   // Solde modeste
+        Portfolio<Asset> p3 = new Portfolio<>(25000f);
+
+        // Création des Traders
+        Trader t1 = new Trader("Yassine", p1);
+        Trader t2 = new Trader("Sophie", p2);
+        Trader t3 = new Trader("Karim", p3);
+
+        // Liaison bidirectionnelle si nécessaire et ajout à la liste
+        p1.setTrader(t1);
+        p2.setTrader(t2);
+        p3.setTrader(t3);
+
+        traders.addAll(Arrays.asList(t1, t2, t3));
+
+        // Récupération de quelques actifs pour les tests
+        Asset btc = actifs.get(0); // Bitcoin
+        Asset aapl = actifs.get(3); // Apple
+        Asset nvda = actifs.get(4); // Nvidia
+
+        // --- TRANSACTION 1 : ACHAT ANCIEN ---
+        Transaction tr1 = new Transaction("BOUGHT", 62000f, t1, btc);
+        tr1.setDate(LocalDateTime.now().minusDays(10)); // Il y a 10 jours
+
+        // --- TRANSACTION 2 : VENTE RÉCENTE ---
+        Transaction tr2 = new Transaction("SELL", 65500f, t1, btc);
+        tr2.setDate(LocalDateTime.now().minusDays(2)); // Il y a 2 jours
+
+        // --- TRANSACTION 3 : ACHAT PAR UN AUTRE TRADER ---
+        Transaction tr3 = new Transaction("BOUGHT", 185f, t2, aapl);
+        tr3.setDate(LocalDateTime.now().minusHours(5)); // Aujourd'hui
+
+        // --- TRANSACTION 4 : GROS ACHAT NVIDIA ---
+        Transaction tr4 = new Transaction("BOUGHT", 820f, t3, nvda);
+        tr4.setDate(LocalDateTime.now().minusMonths(1)); // Le mois dernier
+
+        // Ajout à la liste globale
+        transactions.addAll(Arrays.asList(tr1, tr2, tr3, tr4));
+
+        System.out.println("✅ Données de test générées : " + traders.size() + " traders et " + transactions.size() + " transactions.");
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     // function to register a new trader and creat his portfolio
     public void addTrader() {
@@ -264,7 +321,7 @@ public class TradingPlatform {
 
         // call the holding function of the trader
         trader.getPortfolio().holdAsset(asset);
-        Transaction t = new Transaction("bought", asset.getUnitPrice(), trader, asset);
+        Transaction t = new Transaction("BOUGHT", asset.getUnitPrice(), trader, asset);
         registerTransaction(t);
     }
 
@@ -291,7 +348,7 @@ public class TradingPlatform {
         }
         // call the inholding function of the trader
         portfolio.inholdAsset(asset);
-        Transaction t = new Transaction("sell", asset.getUnitPrice(), trader, asset);
+        Transaction t = new Transaction("SELL", asset.getUnitPrice(), trader, asset);
         registerTransaction(t);
     }
 
@@ -383,6 +440,198 @@ public class TradingPlatform {
         currentTrader = null;
         System.out.println("good by");
     }
+    // Afficher toutes les transactions d’un trader donné
+    public void filtrerTransction(Trader trader){
+        List<Transaction> traderTransactions = new ArrayList<>();
+        traderTransactions = transactions.stream().filter(t->t.getTrader().equals(trader)).toList();
+        System.out.printf("_____________________________ %s transactions _____________________________\n",trader.getName());
+        if (traderTransactions.isEmpty()){
+            System.out.println("No transaction available !!!");
+            return;
+        }
+        System.out.printf(
+                "%-6s | %-10s | %-15s | %-12s | %12s | %-20s%n",
+                "ID", "TYPE", "ASSET", "TRADER", "UNIT_PRICE", "DATE"
+        );
+        System.out.println("_________________________________________________________________________");
+
+        traderTransactions.forEach(t -> {
+            System.out.printf(
+                    "%-6d | %-10s | %-15s | %-12s | %12.2f | %-20s%n",
+                    t.getId(),
+                    t.getTransactionType().toUpperCase(),
+                    t.getAsset().getName(),
+                    t.getTrader().getName(),
+                    t.getUnitPrice(),
+                    t.getDate()
+            );
+        });
+        System.out.println("_________________________________________________________________________");
+    }
+
+    // Filtrer les transactions par : type (BUY / SELL), actif financier (ex : AAPL, BTC, EUR/USD), intervalle de dates
+    public void typeFilteringTransaction(){
+        System.out.println("_____________________________ filter transactions _____________________________");
+        System.out.println("1. Par Type (BUY/SELL)");
+        System.out.println("2. Par Actif ");
+        System.out.println("3. Par Intervalle de Dates");
+        int choice = Validating.validateInts("filtering choice");
+        List<Transaction> filteredTransactions = new ArrayList<>();
+        if (choice == 1){
+            System.out.println("1 ==> SELL");
+            System.out.println("2 ==> BUY");
+            int type = validateInts("type");
+            if (type == 1){
+                filteredTransactions = transactions.stream().filter(t -> t.getTransactionType().toLowerCase().equals("sell")).toList();
+            }
+            if (type == 2) {
+                filteredTransactions = transactions.stream().filter(t -> t.getTransactionType().toLowerCase().equals("bought")).toList();
+            }
+            if (type != 1 && type != 2 ){
+                System.out.println("Invalid type");
+            }
+        }
+        if (choice == 2 ){
+            String actif = validateString("Asset name");
+            filteredTransactions = transactions.stream().filter(t -> t.getAsset().getName().toLowerCase().equals(actif.toLowerCase())).toList();
+        }
+        if (choice == 3){
+            System.out.println("year-months-day");
+            LocalDate start = LocalDate.parse(validateString("Starting date"));
+            LocalDate end = LocalDate.parse(validateString("Ending date"));
+            try {
+                filteredTransactions = transactions.stream().filter(t -> {
+                    LocalDate d = t.getDate().toLocalDate();
+                    return !d.isBefore(start) && !d.isAfter(end);
+                }).toList();
+            }catch (DateTimeParseException e) {
+            System.out.println("Somthign went wrong");
+            return;
+        }
+        }
+        if (choice != 1 && choice != 2 && choice != 3){
+            System.out.println("invalid choice");
+        }
+
+        if (filteredTransactions.isEmpty()){
+            System.out.println("No transaction available !!!");
+            return;
+        }
+        System.out.printf(
+                "%-6s | %-10s | %-15s | %-12s | %12s | %-20s%n",
+                "ID", "TYPE", "ASSET", "TRADER", "UNIT_PRICE", "DATE"
+        );
+        System.out.println("_________________________________________________________________________");
+
+        filteredTransactions.forEach(t -> {
+            System.out.printf(
+                    "%-6d | %-10s | %-15s | %-12s | %12.2f | %-20s%n",
+                    t.getId(),
+                    t.getTransactionType().toUpperCase(),
+                    t.getAsset().getName(),
+                    t.getTrader().getName(),
+                    t.getUnitPrice(),
+                    t.getDate()
+            );
+        });
+        System.out.println("_________________________________________________________________________");
+    }
+
+    // Trier les transactions par : date, montant
+
+    public void trierTransaction(){
+        System.out.println("_____________________________ sort transactions _____________________________");
+        System.out.println("1 ==> to sort it by date");
+        System.out.println("2 ==> to sort it by price");
+        int choice = validateInts("sorting option");
+        if (choice == 1) {
+            transactions = transactions.stream()
+                    .sorted(Comparator.comparing(Transaction::getDate))
+                    .collect(Collectors.toCollection(ArrayList::new));
+        }
+        if (choice == 2){
+            transactions = transactions.stream()
+                    .sorted(Comparator.comparing(Transaction::getUnitPrice))
+                    .collect(Collectors.toCollection(ArrayList::new));
+        }
+        if (choice != 1 && choice != 2){
+            System.out.println("invalid choice !!!!");
+        }
+        displayTransactions();
+    }
+
+    // Calculer : le volume total échangé par actif, le montant total des achats et des ventes
+    public void totalChane(){
+        displayAssets();
+        String assetName = validateString("Asset name").toLowerCase();
+        List<Transaction> transactionsForAsset = new ArrayList<>();
+        transactionsForAsset = transactions.stream().filter(t->t.getAsset().getName().toLowerCase().equals(assetName)).toList();
+        double sellChange = transactionsForAsset.stream()
+                .filter(t -> t.getTransactionType().equalsIgnoreCase("sell"))
+                .map(Transaction::getUnitPrice)
+                .reduce(0.0f, Float::sum);
+
+       double buyChange = transactionsForAsset.stream()
+            .filter(t -> t.getTransactionType().equalsIgnoreCase("bought"))
+            .map(Transaction::getUnitPrice)
+            .reduce(0.0f, Float::sum);
+
+        System.out.println("total change for  : "+assetName);
+        System.out.println("Sells : "+sellChange);
+        System.out.println("Bought : "+buyChange);
+    }
+    // Calcul du volume total échangé par trader
+    public void totalChangeBytradedr(Trader trader){
+        System.out.println("_____________________________ sort transactions _____________________________");
+        List<Transaction> traderTransactions = transactions.stream().filter(t-> t.getTrader().equals(trader)).toList();
+        if(traderTransactions.isEmpty()){
+            System.out.println("no transaction for this trader");
+            return;
+        }
+        double totalBuy = traderTransactions.stream().filter(t -> t.getTransactionType().toLowerCase().equals("bought")).map(t->t.getUnitPrice()).reduce(0.0f, Float::sum);
+        double totalSell = traderTransactions.stream().filter(t -> t.getTransactionType().toLowerCase().equals("sell")).map(t->t.getUnitPrice()).reduce(0.0f, Float::sum);
+
+        System.out.println("total change for  : "+trader.getName());
+        System.out.println("Sells : "+totalSell);
+        System.out.println("Bought : "+totalBuy);
+    }
+    // Calcul du nombre total d’ordres passés
+    public void totalOrders(Trader trader){
+        System.out.printf("_____________________________ Total transactions for %s_____________________________\n",trader.getName());
+        List<Transaction> traderTransactions = transactions.stream().filter(t-> t.getTrader().equals(trader)).toList();
+        if(traderTransactions.isEmpty()){
+            System.out.println("no transaction for this trader");
+            return;
+        }
+        System.out.printf(
+                "%-6s | %-10s | %-15s | %-12s | %12s | %-20s%n",
+                "ID", "TYPE", "ASSET", "TRADER", "UNIT_PRICE", "DATE"
+        );
+        System.out.println("_________________________________________________________________________");
+
+        traderTransactions.forEach(t -> {
+            System.out.printf(
+                    "%-6d | %-10s | %-15s | %-12s | %12.2f | %-20s%n",
+                    t.getId(),
+                    t.getTransactionType().toUpperCase(),
+                    t.getAsset().getName(),
+                    t.getTrader().getName(),
+                    t.getUnitPrice(),
+                    t.getDate()
+            );
+        });
+        System.out.println("_________________________________________________________________________");
+    }
+    //Classement des traders par volume (top N traders)
+    public void classementTrader(){
+        System.out.println("_____________________________ Trader classment _____________________________");
+        // List<Trader> tradersIntransaction = transactions.stream().map(t-> t.getTrader()).toList();
+
+        Map<Trader , Integer> traderacticity = new HashMap<>();
+
+
+
+    }
 
     // trader menu
 
@@ -400,7 +649,9 @@ public class TradingPlatform {
             System.out.println("3 ==> purchase an asset");
             System.out.println("4 ==> sell an asset");
             System.out.println("5 ==> watch your held assets");
-            System.out.println("6 ==> log out");
+            System.out.println("6 ==> display all your transaction");
+            System.out.println("7 ==> filter transactions");
+            System.out.println("7 ==> log out");
 
             // getting the trader choice
             choice = validateInts("choice");
@@ -412,10 +663,12 @@ public class TradingPlatform {
                 case 3 -> purchaseAsset(currentTrader);
                 case 4 -> sellAsst(currentTrader);
                 case 5 -> currentTrader.getPortfolio().watchHeldAssets();
-                case 6 -> logOut();
+                case 6 -> filtrerTransction(currentTrader);
+                case 7 -> typeFilteringTransaction();
+                case 8 -> logOut();
                 default -> System.out.println("Invalid choice");
             }
-        } while (choice != 6 );
+        } while (choice != 8 );
 
     }
     // admin
@@ -437,6 +690,8 @@ public class TradingPlatform {
             System.out.println("4 ==> Export Transactions ");
             System.out.println("5 ==> View all available assets ");
             System.out.println("6 ==> Global Market Watch");
+            System.out.println("8 ==> sort transactios");
+            System.out.println("9 ==> totalChane");
             System.out.println("7 ==> Exit Admin Mode");
 
             choice = validateInts("Admin Choice");
@@ -448,6 +703,8 @@ public class TradingPlatform {
                 case 4 -> exportTransactions();
                 case 5 -> displayAssets();
                 case 6 -> watchAllAssets();
+                case 8 -> trierTransaction();
+                case 9 -> totalChane();
                 case 7 -> System.out.println("ok");
                 default -> System.out.println("❌ Invalid choice.");
             }
@@ -469,6 +726,7 @@ public class TradingPlatform {
         \u001B[0m""");
         // calling the price updating function
         updateAssetsPrice();
+        seedTestData();
 
 
         int choice = 0;
