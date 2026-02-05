@@ -2,14 +2,11 @@ package org.example;
 
 import service.TradingPlatform;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+
 public class Main {
-    static void main() {
-        TradingPlatform t = new TradingPlatform();
-
+   static void main() {
+       TradingPlatform t = new TradingPlatform();
         t.appInerface();
-
-
-    }
+   }
 }

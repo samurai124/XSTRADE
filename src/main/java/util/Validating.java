@@ -14,7 +14,7 @@ public class Validating {
     public static int validateInts(String fieldName){
         int validatedInt = 0;
         do {
-            System.out.print("Enter your "+fieldName+" : ");
+            System.out.print("Enter  "+fieldName+" : ");
             try {
                 validatedInt = Integer.parseInt(input.nextLine());
             } catch (NumberFormatException e) {
@@ -29,7 +29,7 @@ public class Validating {
     public static float validateFloats(String fieldName){
         float validatedFloat = 0;
         do {
-            System.out.print("Enter your "+fieldName+" : ");
+            System.out.print("Enter  "+fieldName+" : ");
             try {
                 validatedFloat = Float.parseFloat(input.nextLine());
             } catch (NumberFormatException e) {
@@ -46,7 +46,7 @@ public class Validating {
     public static String validateString(String fieldName){
         String validatedString = "";
         do {
-            System.out.print("Enter your "+fieldName+" : ");
+            System.out.print("Enter  "+fieldName+" : ");
             validatedString = input.nextLine();
             if (validatedString.isEmpty()) {
                 System.out.println("Please enter a valid"+ fieldName);
