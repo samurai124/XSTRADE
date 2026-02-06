@@ -22,14 +22,14 @@ public class TradingPlatform {
     // the list of the assets available in the platform
     private ArrayList<Asset> actifs = new ArrayList<>(
             Arrays.asList(
-                    new CryptoCurrency("BTC", 65000, 10, new ArrayList<>(Arrays.asList(-500, 500)), "Bitcoin"),
-                    new CryptoCurrency("ETH", 3500, 50, new ArrayList<>(Arrays.asList(-50, 50)), "Ethereum"),
-                    new CryptoCurrency("SOL", 145, 200, new ArrayList<>(Arrays.asList(-5, 5)), "Solana"),
+                    new CryptoCurrency("BTC", 65000, new ArrayList<>(Arrays.asList(-500, 500)), "Bitcoin"),
+                    new CryptoCurrency("ETH", 3500,  new ArrayList<>(Arrays.asList(-50, 50)), "Ethereum"),
+                    new CryptoCurrency("SOL", 145,  new ArrayList<>(Arrays.asList(-5, 5)), "Solana"),
 
-                    new Stock("AAPL", 185, 1000, new ArrayList<>(Arrays.asList(-2, 2)), "Apple Inc."),
-                    new Stock("NVDA", 820, 500, new ArrayList<>(Arrays.asList(-10, 10)), "Nvidia Corporation"),
-                    new Stock("TSLA", 175, 800, new ArrayList<>(Arrays.asList(-4, 4)), "Tesla, Inc."),
-                    new Stock("GOOGL", 150, 1200, new ArrayList<>(Arrays.asList(-1, 1)), "Alphabet Inc.")
+                    new Stock("AAPL", 185,  new ArrayList<>(Arrays.asList(-2, 2)), "Apple Inc."),
+                    new Stock("NVDA", 820,  new ArrayList<>(Arrays.asList(-10, 10)), "Nvidia Corporation"),
+                    new Stock("TSLA", 175,  new ArrayList<>(Arrays.asList(-4, 4)), "Tesla, Inc."),
+                    new Stock("GOOGL", 150,  new ArrayList<>(Arrays.asList(-1, 1)), "Alphabet Inc.")
             )
     );
     // the list of all the transactions performed in the platform
@@ -37,61 +37,6 @@ public class TradingPlatform {
 
     // current trader in session
     private Trader currentTrader = null;
-
-    public void seedTestData() {
-        // Création des Portefeuilles
-        Portfolio<Asset> p1 = new Portfolio<>(100000f); // Solde important
-        Portfolio<Asset> p2 = new Portfolio<>(5000f);   // Solde modeste
-        Portfolio<Asset> p3 = new Portfolio<>(25000f);
-
-        // Création des Traders
-        Trader t1 = new Trader("Yassine", p1);
-        Trader t2 = new Trader("Sophie", p2);
-        Trader t3 = new Trader("Karim", p3);
-
-        // Liaison bidirectionnelle si nécessaire et ajout à la liste
-        p1.setTrader(t1);
-        p2.setTrader(t2);
-        p3.setTrader(t3);
-
-        traders.addAll(Arrays.asList(t1, t2, t3));
-
-        // Récupération de quelques actifs pour les tests
-        Asset btc = actifs.get(0); // Bitcoin
-        Asset aapl = actifs.get(3); // Apple
-        Asset nvda = actifs.get(4); // Nvidia
-
-        // --- TRANSACTION 1 : ACHAT ANCIEN ---
-        Transaction tr1 = new Transaction("BOUGHT", 62000f, t1, btc);
-        tr1.setDate(LocalDateTime.now().minusDays(10)); // Il y a 10 jours
-
-        // --- TRANSACTION 2 : VENTE RÉCENTE ---
-        Transaction tr2 = new Transaction("SELL", 65500f, t1, btc);
-        tr2.setDate(LocalDateTime.now().minusDays(2)); // Il y a 2 jours
-
-        // --- TRANSACTION 3 : ACHAT PAR UN AUTRE TRADER ---
-        Transaction tr3 = new Transaction("BOUGHT", 185f, t2, aapl);
-        tr3.setDate(LocalDateTime.now().minusHours(5)); // Aujourd'hui
-
-        // --- TRANSACTION 4 : GROS ACHAT NVIDIA ---
-        Transaction tr4 = new Transaction("BOUGHT", 820f, t3, nvda);
-        tr4.setDate(LocalDateTime.now().minusMonths(1)); // Le mois dernier
-
-        // Ajout à la liste globale
-        transactions.addAll(Arrays.asList(tr1, tr2, tr3, tr4));
-
-        System.out.println("✅ Données de test générées : " + traders.size() + " traders et " + transactions.size() + " transactions.");
-    }
-
-
-
-
-
-
-
-
-
-
 
 
     // function to register a new trader and creat his portfolio
@@ -157,8 +102,6 @@ public class TradingPlatform {
 
         float unitPrice = Validating.validateFloats("unitPrice");
 
-        // getting the quantity
-        int quantity = Validating.validateInts("quantity");
 
         // getting the price intervale
         System.out.println("Enter the price intervale start and end : ");
@@ -172,7 +115,7 @@ public class TradingPlatform {
             String companyName = Validating.validateString("company name");
 
             // creating the stock object
-            Stock stock = new Stock(name, unitPrice,quantity, new ArrayList<>(java.util.Arrays.asList(a, b)), companyName);
+            Stock stock = new Stock(name, unitPrice, new ArrayList<>(java.util.Arrays.asList(a, b)), companyName);
 
             // register the stock
             actifs.add(stock);
@@ -188,7 +131,7 @@ public class TradingPlatform {
             String cryptoName = Validating.validateString("crypto coin name");
 
             // creating the crypto object
-            CryptoCurrency cryptoCurrency = new CryptoCurrency(name, unitPrice, quantity , new ArrayList<>(java.util.Arrays.asList(a, b)), cryptoName);
+            CryptoCurrency cryptoCurrency = new CryptoCurrency(name, unitPrice, new ArrayList<>(java.util.Arrays.asList(a, b)), cryptoName);
 
             // register the crypto
             actifs.add(cryptoCurrency);
@@ -199,50 +142,26 @@ public class TradingPlatform {
     }
 
     public void displayAssets() {
-        final String SEPARATOR =
-                "----------------------------------------------------------------------------------------------------";
+        String separator = "--------------------------------------------------------------------------------";
+        System.out.println(separator);
 
-        System.out.println(SEPARATOR);
-
-        // 🔹 HEADER (LABELS) - Alignement identique aux transactions
-        System.out.printf(
-                "%-8s | %-6s | %-15s | %12s | %8s | %-20s%n",
-                "TYPE", "ID", "NAME", "PRICE", "QTY", "SOURCE"
-        );
-
-        System.out.println(SEPARATOR);
+        // Header: 5 columns
+        System.out.printf("%-10s | %-5s | %-15s | %-10s | %-20s%n", "TYPE", "ID", "NAME", "PRICE", "SOURCE");
+        System.out.println(separator);
 
         if (actifs.isEmpty()) {
             System.out.println("No assets available.");
-            System.out.println(SEPARATOR);
-            return;
-        }
+        } else {
+            for (Asset a : actifs) {
+                String type = (a instanceof Stock) ? "STOCK" : "CRYPTO";
+                String source = (a instanceof Stock) ? ((Stock) a).getCompanyName() : ((CryptoCurrency) a).getCoineName();
 
-        // 🔹 DATA - Affichage en liste continue
-        actifs.forEach(a -> {
-            String type = "";
-            String source = "";
-
-            if (a instanceof Stock) {
-                type = "STOCK";
-                source = ((Stock) a).getCompanyName();
-            } else if (a instanceof CryptoCurrency) {
-                type = "CRYPTO";
-                source = ((CryptoCurrency) a).getCoineName();
+                // Fixed: Matched the 5 columns exactly
+                System.out.printf("%-10s | %-5d | %-15s | %-10.2f | %-20s%n",
+                        type, a.getId(), a.getName(), a.getUnitPrice(), source);
             }
-
-            System.out.printf(
-                    "%-8s | %-6d | %-15s | %12.2f | %8d | %-20s%n",
-                    type,
-                    a.getId(),
-                    a.getName(),
-                    a.getUnitPrice(),
-                    a.getQuantite(),
-                    source
-            );
-        });
-
-        System.out.println(SEPARATOR);
+        }
+        System.out.println(separator);
     }
     // function to register a new transaction in the platform
     public void registerTransaction(Transaction t) {
@@ -623,15 +542,106 @@ public class TradingPlatform {
         System.out.println("_________________________________________________________________________");
     }
     //Classement des traders par volume (top N traders)
-    public void classementTrader(){
-        System.out.println("_____________________________ Trader classment _____________________________");
-        // List<Trader> tradersIntransaction = transactions.stream().map(t-> t.getTrader()).toList();
+    public void classementTrader() {
+        System.out.println("_____________________________ Top Trader (Le plus actif) _____________________________");
 
-        Map<Trader , Integer> traderacticity = new HashMap<>();
+        if (transactions.isEmpty()) {
+            System.out.println("Aucune transaction enregistrée.");
+            return;
+        }
+
+        Map<Trader, Integer> traderActivity = new HashMap<>();
+        transactions.forEach(t -> {
+            traderActivity.put(
+                    t.getTrader(),
+                    traderActivity.getOrDefault(t.getTrader(), 0) + 1
+            );
+        });
 
 
+        Trader topTrader = traderActivity.keySet().stream().findFirst().orElse(null);
+        int maxOrders = traderActivity.get(topTrader);
+
+        for (Map.Entry<Trader, Integer> entry : traderActivity.entrySet()) {
+            if (entry.getValue() > maxOrders) {
+                maxOrders = entry.getValue();
+                topTrader = entry.getKey();
+            }
+        }
+
+        System.out.println("The trader the moste actif :  " + topTrader.getName() + " : " + maxOrders );
+    }
+
+
+
+
+    // Calcul du volume total échangé par instrument financier
+
+    public void volumeTotalinstrument(){
+        displayAssets();
+        String assetName = validateString("Asset name").toLowerCase();
+        List<Transaction> transactionsForAsset = new ArrayList<>();
+        transactionsForAsset = transactions.stream().filter(t-> t.getAsset().getName().toLowerCase().equals(assetName)).toList();
+        int totaleVolume = transactionsForAsset.size();
+        System.out.println("Total volume : "+totaleVolume);
+    }
+
+
+    //Identification de l’instrument le plus échangé
+    public void instrumentPlusEchange(){
+        Map<Asset, Integer> assetActivity = new HashMap<>();
+        transactions.forEach(t -> {
+            assetActivity.put(
+                    t.getAsset(),
+                    assetActivity.getOrDefault(t.getAsset(), 0) + 1
+            );
+        });
+        Asset assetMax = assetActivity.keySet().stream().findFirst().orElse(null);
+        int assetMaxVolue = assetActivity.get(assetMax);
+        for (Map.Entry<Asset, Integer> entry : assetActivity.entrySet()) {
+            if (entry.getValue() > assetMaxVolue) {
+                assetMaxVolue = entry.getValue();
+                assetMax = entry.getKey();
+            }
+        }
+
+        System.out.println("__________________________________________________________________");
+        System.out.println("Most changed asset: " + assetMax.getName() + ":" + assetMaxVolue );
 
     }
+
+
+
+
+
+
+
+    //Calcul du montant total des BUY et des SELL séparément
+    public void calculerTotaalAchatVente() {
+        System.out.println("_________________________  Total BUY / SELL _________________________");
+
+        if (transactions.isEmpty()) {
+            System.out.println("Aucune transaction enregistrée.");
+            return;
+        }
+
+        float totalBuy = 0.0f;
+        float totalSell = 0.0f;
+
+        for (Transaction t : transactions) {
+            if (t.getTransactionType().equalsIgnoreCase("BOUGHT")) {
+                totalBuy += t.getUnitPrice();
+            } else if (t.getTransactionType().equalsIgnoreCase("SELL")) {
+                totalSell += t.getUnitPrice();
+            }
+        }
+
+        System.out.printf("Total  Achats (BUY)  : %.2f $\n", totalBuy);
+        System.out.printf("Total  Ventes (SELL) : %.2f $\n", totalSell);
+        System.out.println("_____________________________________________________________________________");
+    }
+
+
 
     // trader menu
 
@@ -652,9 +662,8 @@ public class TradingPlatform {
             System.out.println("6 ==> display all your transaction");
             System.out.println("7 ==> filter transactions");
             System.out.println("7 ==> log out");
-
-            // getting the trader choice
             choice = validateInts("choice");
+
 
             // call the right function for ech choice
             switch (choice) {
@@ -690,9 +699,14 @@ public class TradingPlatform {
             System.out.println("4 ==> Export Transactions ");
             System.out.println("5 ==> View all available assets ");
             System.out.println("6 ==> Global Market Watch");
+            System.out.println("_________________________________________________ Parte 2 _________________________________________________");
             System.out.println("8 ==> sort transactios");
             System.out.println("9 ==> totalChane");
-            System.out.println("7 ==> Exit Admin Mode");
+            System.out.println("10 ==>  classement Trader");
+            System.out.println("11 ==>  volumeTotalinstrument");
+            System.out.println("12 ==> instrumentPlusEchange");
+            System.out.println("13 ==>  priceTotalinstrument");
+            System.out.println("14 ==> Exit Admin Mode");
 
             choice = validateInts("Admin Choice");
 
@@ -705,10 +719,14 @@ public class TradingPlatform {
                 case 6 -> watchAllAssets();
                 case 8 -> trierTransaction();
                 case 9 -> totalChane();
-                case 7 -> System.out.println("ok");
+                case 10 -> classementTrader();
+                case 11 -> volumeTotalinstrument();
+                case 12 -> instrumentPlusEchange();
+                case 13 -> calculerTotaalAchatVente();
+                case 14 -> System.out.println("ok");
                 default -> System.out.println("❌ Invalid choice.");
             }
-        } while (choice != 7);
+        } while (choice != 14);
 
     }
     // the app interface
@@ -726,7 +744,6 @@ public class TradingPlatform {
         \u001B[0m""");
         // calling the price updating function
         updateAssetsPrice();
-        seedTestData();
 
 
         int choice = 0;
